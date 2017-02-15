@@ -18,6 +18,13 @@ def get_image(image_path, input_height, input_width,
               resize_height=64, resize_width=64,
               is_crop=True, is_grayscale=False):
   image = imread(image_path, is_grayscale)
+  if image.ndim == 2 and not is_grayscale:
+    w, h = image.shape
+    ret = np.empty((w, h, 3), dtype=np.uint8)
+    ret[:, :, 0] = image
+    ret[:, :, 1] = image
+    ret[:, :, 2] = image
+    image = ret
   return transform(image, input_height, input_width,
                    resize_height, resize_width, is_crop)
 

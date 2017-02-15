@@ -81,8 +81,12 @@ class DCGAN(object):
 
     self.inputs = tf.placeholder(
       tf.float32, [self.batch_size] + image_dims, name='real_images')
+
     self.sample_inputs = tf.placeholder(
       tf.float32, [self.sample_num] + image_dims, name='sample_inputs')
+
+    print('\n\n\n{}\n{}\n'.format(self.sample_inputs.get_shape(),
+                                  self.inputs.get_shape()))
 
     inputs = self.inputs
     sample_inputs = self.sample_inputs
@@ -112,13 +116,13 @@ class DCGAN(object):
 
     self.d_loss_real = tf.reduce_mean(
       tf.nn.sigmoid_cross_entropy_with_logits(
-        logits=self.D_logits, labels=tf.ones_like(self.D)))
+        logits=self.D_logits, targets=tf.ones_like(self.D)))
     self.d_loss_fake = tf.reduce_mean(
       tf.nn.sigmoid_cross_entropy_with_logits(
-        logits=self.D_logits_, labels=tf.zeros_like(self.D_)))
+        logits=self.D_logits_, targets=tf.zeros_like(self.D_)))
     self.g_loss = tf.reduce_mean(
       tf.nn.sigmoid_cross_entropy_with_logits(
-        logits=self.D_logits_, labels=tf.ones_like(self.D_)))
+        logits=self.D_logits_, targets=tf.ones_like(self.D_)))
 
     self.d_loss_real_sum = scalar_summary("d_loss_real", self.d_loss_real)
     self.d_loss_fake_sum = scalar_summary("d_loss_fake", self.d_loss_fake)
@@ -176,8 +180,9 @@ class DCGAN(object):
       if (self.is_grayscale):
         sample_inputs = np.array(sample).astype(np.float32)[:, :, :, None]
       else:
+        print(len(sample), sample[0].shape)
         sample_inputs = np.array(sample).astype(np.float32)
-  
+
     counter = 1
     start_time = time.time()
 
@@ -304,7 +309,7 @@ class DCGAN(object):
             except:
               print("one pic error!...")
 
-        if np.mod(counter, 500) == 2:
+        if np.mod(counter, 2000) == 2:
           self.save(config.checkpoint_dir, counter)
 
   def discriminator(self, image, y=None, reuse=False):
@@ -473,7 +478,7 @@ class DCGAN(object):
     teY = np.asarray(teY)
     
     X = np.concatenate((trX, teX), axis=0)
-    y = np.concatenate((trY, teY), axis=0).astype(np.int)
+    y = np.concatenate((trY, teY), axis=0)
     
     seed = 547
     np.random.seed(seed)
